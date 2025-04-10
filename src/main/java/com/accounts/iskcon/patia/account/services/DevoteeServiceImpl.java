@@ -22,7 +22,6 @@ public class DevoteeServiceImpl implements DevoteeService{
     public DevoteeRegisterRes registerDevotee(DevoteeRegisterReq devoteeRegisterReq) {
         String mobileNumber = devoteeRegisterReq.getMobileNumber().toString();
         String password = devoteeRegisterReq.getName().substring(0,4) + mobileNumber.substring(mobileNumber.length()-4, mobileNumber.length());
-        System.out.println(password);
         try{
 
             if(devoteeRepo.existsByMobileNumber(devoteeRegisterReq.getMobileNumber())){

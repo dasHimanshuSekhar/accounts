@@ -11,19 +11,18 @@ import org.springframework.context.annotation.Primary;
 public class DbConfig {
     Logger logger = LoggerFactory.getLogger(DbConfig.class);
 
-    @Bean(name = "PgDbConnect")
+    @Bean(name = "pgDbConnect")
     @Primary
     public PGSimpleDataSource connectDb(){
         PGSimpleDataSource ds = new PGSimpleDataSource();
         try{
-            System.out.println("==================== DB Connection Begins =================");
+            logger.info("==================== DB Connection Begins =================");
 
             ds.setURL("jdbc:postgresql://himanshu-demo-db-9994.j77.aws-ap-southeast-1.cockroachlabs.cloud:26257/accounts?sslmode=verify-full");
             ds.setUser("himanshu");
             ds.setPassword("sgzQdPlykz1Gr5xa6JrVKw");
 
         } catch (Exception e){
-            e.printStackTrace();
             logger.error("DB Configuration :: Exception :: {}", e.getMessage());
         }
         return ds;

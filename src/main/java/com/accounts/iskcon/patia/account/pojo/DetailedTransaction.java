@@ -13,7 +13,7 @@ public class DetailedTransaction{
     private String transactionMode;
     private String transactionType;
     private String category;
-    private LocalDateTime transactionDateTime;
+    private LocalDateTime transactionDateTime   ;
     private String attachment; // later to be changed to save img data
     private String remarks;
     private Double totalTransactionAmount;
