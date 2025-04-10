@@ -11,7 +11,7 @@
 	<groupId>com.accounts.iskcon.patia</groupId>
 	<artifactId>account</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>account-iskcon</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -91,6 +91,17 @@
 							<version>1.18.30</version>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.accounts.iskcon.patia.account.AccountIskconApplication</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 			<plugin>
