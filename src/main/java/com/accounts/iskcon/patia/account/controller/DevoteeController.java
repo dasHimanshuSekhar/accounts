@@ -16,11 +16,13 @@ public class DevoteeController {
         this.devoteeService = devoteeService;
     }
 
+    @CrossOrigin(value = "*")
     @GetMapping("test")
     public String test(){
         return "Account 1.0 !";
     }
 
+    @CrossOrigin(value = "*")
     @PostMapping("register")
     public DevoteeRegisterRes registerDevotee(@RequestBody DevoteeRegisterReq devoteeRegisterReq){
         return devoteeService.registerDevotee(devoteeRegisterReq);

@@ -15,6 +15,7 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
+    @CrossOrigin(value = "*")
     @PostMapping("add-transactions")
     public AddTransactionRes addExpenditure(@RequestBody AddTransactionReq addTransactionReq){
         return transactionService.addTransaction(addTransactionReq);
