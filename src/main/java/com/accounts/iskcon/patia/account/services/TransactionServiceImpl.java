@@ -31,13 +31,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public AddTransactionRes addTransaction(AddTransactionReq addTransactionReq) {
+        logger.info("Request received: {} :: API: add-transactions", addTransactionReq);
         Optional<Devotee> devoteeOptional;
         try
         {
             //existence of devotee && fetch devotee entity
             devoteeOptional = devoteeRepo.findByMobileNumber(addTransactionReq.getMobileNumber());
             if(!devoteeOptional.isPresent()){
-                logger.info("Devotee doesn't exist, who wanted to add expenditure");
+                logger.info("Devotee doesn't exist, who wanted to add expenditure :: API: add-transactions");
                 return new AddTransactionRes(-1, "Devotee doesn't exist, who wanted to add expenditure !");
             }
 
@@ -55,7 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setDevotee(devoteeOptional.get());
             transactionRepo.save(transaction);
         } catch (Exception e) {
-            logger.error("Exception :: MSG: {}", e.getMessage());
+            logger.error("Exception :: MSG: {} :: API: add-transactions", e.getMessage());
             return new AddTransactionRes(-1, "Failed to add your expenditure details, Kindly try again !");
         }
         return new AddTransactionRes(0, "Expenditure details added successfully, Thank you !");
@@ -63,12 +64,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public FetchTransactionResponse fetchTransaction() {
+        logger.info("Request received :: API: fetch-transactions");
         List<Transaction> transactionList;
         List<DetailedTransaction> detailedTransactionList = new ArrayList<>();
         try{
             transactionList = transactionRepo.findAll();
             if(transactionList.isEmpty()){
-                logger.info("No transaction found !");
+                logger.info("No transaction found :: API: fetch-transactions");
                 return new FetchTransactionResponse(-1, "No transaction found, need to have transactions first !", null);
             }
 
@@ -91,7 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
         } catch (Exception e) {
-            logger.error("Exception :: MSG: {}", e.getMessage());
+            logger.error("Exception :: MSG: {} :: API: fetch-transactions", e.getMessage());
             return new FetchTransactionResponse(-1, "Failed to fetch the required transaction details, Kindly try again !", null);
         }
         return new FetchTransactionResponse(0, "Transactions fetched successfully !", detailedTransactionList);

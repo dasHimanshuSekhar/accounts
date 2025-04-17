@@ -20,11 +20,13 @@ public class DevoteeServiceImpl implements DevoteeService{
 
     @Override
     public DevoteeRegisterRes registerDevotee(DevoteeRegisterReq devoteeRegisterReq) {
+        logger.info("Request received: {} :: API: register", devoteeRegisterReq);
         String mobileNumber = devoteeRegisterReq.getMobileNumber().toString();
-        String password = devoteeRegisterReq.getName().substring(0,4) + mobileNumber.substring(mobileNumber.length()-4, mobileNumber.length());
+        String password = devoteeRegisterReq.getName().substring(0,4) + mobileNumber.substring(mobileNumber.length()-4);
         try{
 
             if(devoteeRepo.existsByMobileNumber(devoteeRegisterReq.getMobileNumber())){
+                logger.info("Devotee Already exists :: API: register");
                 return new DevoteeRegisterRes(-1, "Devotee Already exists");
             }
 
@@ -36,7 +38,7 @@ public class DevoteeServiceImpl implements DevoteeService{
 
             devoteeRepo.save(devotee);
         } catch (Exception e) {
-            logger.error("Exception :: MSG: {}", e.getMessage());
+            logger.error("Exception :: MSG: {} :: API: register", e.getMessage());
             return new DevoteeRegisterRes(-1, "DB Exception Occurred !");
         }
         return new DevoteeRegisterRes(0, "Devotee Onboarded Successfully !");
