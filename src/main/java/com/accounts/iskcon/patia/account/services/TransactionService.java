@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface TransactionService {
     AddTransactionRes addTransaction(AddTransactionReq addTransactionReq, MultipartFile multipartFile);
 
-    FetchTransactionResponse fetchTransaction();
+    FetchTransactionResponse fetchTransaction(Long mobileNumber);
 }

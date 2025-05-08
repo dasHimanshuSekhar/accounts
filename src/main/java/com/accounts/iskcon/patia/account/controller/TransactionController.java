@@ -27,10 +27,14 @@ public class TransactionController {
         return ResponseEntity.status(addTransactionRes.getStatusCode().equals(-1) ? HttpStatus.NOT_FOUND : HttpStatus.OK).body(addTransactionRes);
     }
 
-    @CrossOrigin(value = "*")
+    @CrossOrigin("*")
     @GetMapping("fetch-transactions")
-    public ResponseEntity<FetchTransactionResponse> fetchTransaction(){
-        FetchTransactionResponse fetchTransactionResponse = transactionService.fetchTransaction();
-        return ResponseEntity.status(fetchTransactionResponse.getStatusCode().equals(-1) ? HttpStatus.NOT_FOUND : HttpStatus.OK).body(fetchTransactionResponse);
+    public ResponseEntity<FetchTransactionResponse> fetchTransaction(
+            @RequestParam(value = "mobileNumber", required = false) Long mobileNumber) {
+
+        FetchTransactionResponse response = transactionService.fetchTransaction(mobileNumber);
+        return ResponseEntity
+                .status(response.getStatusCode().equals(-1) ? HttpStatus.NOT_FOUND : HttpStatus.OK)
+                .body(response);
     }
 }

@@ -1,5 +1,6 @@
 package com.accounts.iskcon.patia.account.services;
 
+import com.accounts.iskcon.patia.account.dto.FetchTransactionProjection;
 import com.accounts.iskcon.patia.account.entities.Devotee;
 import com.accounts.iskcon.patia.account.entities.Transaction;
 import com.accounts.iskcon.patia.account.pojo.AddTransactionReq;
@@ -68,45 +69,54 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
-    public FetchTransactionResponse fetchTransaction() {
-        logger.info("Request received :: API: fetch-transactions");
-        List<Transaction> transactionList;
+    public FetchTransactionResponse fetchTransaction(Long mobileNumber) {
+        logger.info("Request received {} :: API: fetch-transactions",
+                mobileNumber != null ? "for mobileNumber: " + mobileNumber : "for all transactions");
+
+        List<FetchTransactionProjection> transactionList;
         List<DetailedTransaction> detailedTransactionList = new ArrayList<>();
-        try{
-            transactionList = transactionRepo.findAll();
-            if(transactionList.isEmpty()){
-                logger.info("No transaction found :: API: fetch-transactions");
-                return new FetchTransactionResponse(-1, "No transaction found, need to have transactions first !", null);
+
+        try {
+            // Fetch either all or by mobile number
+            if (mobileNumber != null) {
+                transactionList = transactionRepo.findByDevoteeMobileNumber(mobileNumber);
+            } else {
+                transactionList = transactionRepo.findByAllDevotee();
+            }
+            if (transactionList.isEmpty()) {
+                logger.info("No transactions found :: API: fetch-transactions");
+                return new FetchTransactionResponse(-1, "No transaction found!", null);
             }
 
-            for(Transaction transaction : transactionList){
-                DetailedTransaction detailedTransaction = new DetailedTransaction();
-                detailedTransaction.setTransactionId(transaction.getId());
-                detailedTransaction.setMobileNumber(transaction.getDevotee().getMobileNumber());
-                detailedTransaction.setName(transaction.getDevotee().getName());
-                detailedTransaction.setPurpose(transaction.getPurpose());
-                detailedTransaction.setTransactionMode(Boolean.TRUE.equals(transaction.getIsOnline()) ? "Online" : "Offline");
-                detailedTransaction.setTransactionType(Boolean.TRUE.equals(transaction.getIsCredit()) ? "Credit" : "Debit");
-                detailedTransaction.setCategory(transaction.getCategory());
-                detailedTransaction.setTransactionDateTime(transaction.getDate());
-//                detailedTransaction.setAttachment(transaction.getAttachment());
 
-                if (transaction.getAttachment() != null) {
-                    String base64 = Base64.getEncoder().encodeToString(transaction.getAttachment());
+            for (FetchTransactionProjection fetchTransactionProjection : transactionList) {
+                DetailedTransaction detailedTransaction = new DetailedTransaction();
+                detailedTransaction.setTransactionId(fetchTransactionProjection.getId());
+                detailedTransaction.setMobileNumber(fetchTransactionProjection.getMobileNumber());
+                detailedTransaction.setName(fetchTransactionProjection.getName());
+                detailedTransaction.setPurpose(fetchTransactionProjection.getPurpose());
+                detailedTransaction.setTransactionMode(Boolean.TRUE.equals(fetchTransactionProjection.getIsOnline()) ? "Online" : "Offline");
+                detailedTransaction.setTransactionType(Boolean.TRUE.equals(fetchTransactionProjection.getIsCredit()) ? "Credit" : "Debit");
+                detailedTransaction.setCategory(fetchTransactionProjection.getCategory());
+                detailedTransaction.setTransactionDateTime(fetchTransactionProjection.getDate());
+
+                if (fetchTransactionProjection.getAttachment() != null) {
+                    String base64 = Base64.getEncoder().encodeToString(fetchTransactionProjection.getAttachment());
                     detailedTransaction.setBase64Attachment(base64);
                 }
 
-                detailedTransaction.setRemarks(transaction.getRemarks());
-                detailedTransaction.setTotalTransactionAmount(transaction.getTotalTransactionAmount());
-                detailedTransaction.setTransactionRefurbishmentStatus(transaction.getTransactionRefurbishmentStatus());
+                detailedTransaction.setRemarks(fetchTransactionProjection.getRemarks());
+                detailedTransaction.setTotalTransactionAmount(fetchTransactionProjection.getTotalTransactionAmount());
+                detailedTransaction.setTransactionRefurbishmentStatus(fetchTransactionProjection.getTransactionRefurbishmentStatus());
 
                 detailedTransactionList.add(detailedTransaction);
             }
 
         } catch (Exception e) {
             logger.error("Exception :: MSG: {} :: API: fetch-transactions", e.getMessage());
-            return new FetchTransactionResponse(-1, "Failed to fetch the required transaction details, Kindly try again !", null);
+            return new FetchTransactionResponse(-1, "Failed to fetch transactions, please try again!", null);
         }
-        return new FetchTransactionResponse(0, "Transactions fetched successfully !", detailedTransactionList);
+
+        return new FetchTransactionResponse(0, "Transactions fetched successfully!", detailedTransactionList);
     }
 }
