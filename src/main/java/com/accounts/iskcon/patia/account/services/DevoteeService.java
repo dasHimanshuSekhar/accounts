@@ -1,8 +1,11 @@
 package com.accounts.iskcon.patia.account.services;
 
-import com.accounts.iskcon.patia.account.pojo.DevoteeRegisterReq;
-import com.accounts.iskcon.patia.account.pojo.DevoteeRegisterRes;
+import com.accounts.iskcon.patia.account.pojo.*;
 
 public interface DevoteeService {
     DevoteeRegisterRes registerDevotee(DevoteeRegisterReq devoteeRegisterReq);
+
+    DevoteeLoginRes loginDevotee(DevoteeLoginReq devoteeLoginReq);
+
+    DevoteeFetchRes fetchDevotee();
 }
