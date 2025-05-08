@@ -11,9 +11,11 @@ import com.accounts.iskcon.patia.account.repos.TransactionRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,30 +32,32 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public AddTransactionRes addTransaction(AddTransactionReq addTransactionReq) {
+    public AddTransactionRes addTransaction(AddTransactionReq addTransactionReq, MultipartFile attachmentFile) {
         logger.info("Request received: {} :: API: add-transactions", addTransactionReq);
         Optional<Devotee> devoteeOptional;
-        try
-        {
-            //existence of devotee && fetch devotee entity
+        try {
             devoteeOptional = devoteeRepo.findByMobileNumber(addTransactionReq.getMobileNumber());
-            if(!devoteeOptional.isPresent()){
+            if (!devoteeOptional.isPresent()) {
                 logger.info("Devotee doesn't exist, who wanted to add expenditure :: API: add-transactions");
                 return new AddTransactionRes(-1, "Devotee doesn't exist, who wanted to add expenditure !");
             }
 
-            //save the expenditure details linked to devotee.
             Transaction transaction = new Transaction();
             transaction.setPurpose(addTransactionReq.getPurpose());
             transaction.setIsOnline(addTransactionReq.getIsOnline());
             transaction.setIsCredit(addTransactionReq.getIsCredit());
             transaction.setCategory(addTransactionReq.getCategory());
             transaction.setDate(LocalDateTime.now());
-            transaction.setAttachment("must be a img");
+
+            if (attachmentFile != null && !attachmentFile.isEmpty()) {
+                transaction.setAttachment(attachmentFile.getBytes());
+            }
+
             transaction.setRemarks(addTransactionReq.getRemarks());
             transaction.setTotalTransactionAmount(addTransactionReq.getTotalTransactionAmount());
             transaction.setTransactionRefurbishmentStatus(addTransactionReq.getTransactionRefurbishmentStatus());
             transaction.setDevotee(devoteeOptional.get());
+
             transactionRepo.save(transaction);
         } catch (Exception e) {
             logger.error("Exception :: MSG: {} :: API: add-transactions", e.getMessage());
@@ -61,6 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return new AddTransactionRes(0, "Expenditure details added successfully, Thank you !");
     }
+
 
     @Override
     public FetchTransactionResponse fetchTransaction() {
@@ -84,7 +89,13 @@ public class TransactionServiceImpl implements TransactionService {
                 detailedTransaction.setTransactionType(Boolean.TRUE.equals(transaction.getIsCredit()) ? "Credit" : "Debit");
                 detailedTransaction.setCategory(transaction.getCategory());
                 detailedTransaction.setTransactionDateTime(transaction.getDate());
-                detailedTransaction.setAttachment(transaction.getAttachment());
+//                detailedTransaction.setAttachment(transaction.getAttachment());
+
+                if (transaction.getAttachment() != null) {
+                    String base64 = Base64.getEncoder().encodeToString(transaction.getAttachment());
+                    detailedTransaction.setBase64Attachment(base64);
+                }
+
                 detailedTransaction.setRemarks(transaction.getRemarks());
                 detailedTransaction.setTotalTransactionAmount(transaction.getTotalTransactionAmount());
                 detailedTransaction.setTransactionRefurbishmentStatus(transaction.getTransactionRefurbishmentStatus());

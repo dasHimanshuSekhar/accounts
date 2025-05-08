@@ -22,7 +22,8 @@ public class Transaction {
     private Boolean isCredit;
     private String category;
     private LocalDateTime date;
-    private String attachment; // later to be changed to save img data
+    @Column(name = "attachment")
+    private byte[] attachment;
     private String remarks;
     private Double totalTransactionAmount;
     private Boolean transactionRefurbishmentStatus;
