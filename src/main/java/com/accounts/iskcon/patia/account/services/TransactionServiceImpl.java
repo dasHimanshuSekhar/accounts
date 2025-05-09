@@ -9,11 +9,13 @@ import com.accounts.iskcon.patia.account.pojo.DetailedTransaction;
 import com.accounts.iskcon.patia.account.pojo.FetchTransactionResponse;
 import com.accounts.iskcon.patia.account.repos.DevoteeRepo;
 import com.accounts.iskcon.patia.account.repos.TransactionRepo;
+import com.accounts.iskcon.patia.account.utils.HelperMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -25,17 +27,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     final DevoteeRepo devoteeRepo;
     final TransactionRepo transactionRepo;
+    final HelperMethods helperMethods;
     Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
-    public TransactionServiceImpl(DevoteeRepo devoteeRepo, TransactionRepo transactionRepo) {
+    public TransactionServiceImpl(DevoteeRepo devoteeRepo, TransactionRepo transactionRepo, HelperMethods helperMethods) {
         this.devoteeRepo = devoteeRepo;
         this.transactionRepo = transactionRepo;
+        this.helperMethods = helperMethods;
     }
 
     @Override
     public AddTransactionRes addTransaction(AddTransactionReq addTransactionReq, MultipartFile attachmentFile) {
         logger.info("Request received: {} :: API: add-transactions", addTransactionReq);
         Optional<Devotee> devoteeOptional;
+        LocalDateTime localDateTime;
         try {
             devoteeOptional = devoteeRepo.findByMobileNumber(addTransactionReq.getMobileNumber());
             if (!devoteeOptional.isPresent()) {
@@ -48,7 +53,14 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setIsOnline(addTransactionReq.getIsOnline());
             transaction.setIsCredit(addTransactionReq.getIsCredit());
             transaction.setCategory(addTransactionReq.getCategory());
-            transaction.setDate(LocalDateTime.now());
+
+            try{
+                localDateTime = helperMethods.parseDateTime(addTransactionReq.getTransactionDateTime());
+            } catch (Exception e) {
+                logger.error("Exception :: Date Parsing Error :: MSG: {} :: API: add-transactions", e.getMessage());
+                return new AddTransactionRes(-1, "Failed to parse date, Kindly try again !");
+            }
+            transaction.setDate(localDateTime);
 
             if (attachmentFile != null && !attachmentFile.isEmpty()) {
                 transaction.setAttachment(attachmentFile.getBytes());
@@ -61,7 +73,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             transactionRepo.save(transaction);
         } catch (Exception e) {
-            logger.error("Exception :: MSG: {} :: API: add-transactions", e.getMessage());
+            logger.error("Exception :: DB Error :: MSG: {} :: API: add-transactions", e.getMessage());
             return new AddTransactionRes(-1, "Failed to add your expenditure details, Kindly try again !");
         }
         return new AddTransactionRes(0, "Expenditure details added successfully, Thank you !");

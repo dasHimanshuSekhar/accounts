@@ -15,6 +15,8 @@ public class AddTransactionReq {
     private Boolean isOnline;
     @NotNull(message = "category is mandatory to choose !")
     private String category;
+    @NotNull(message = "date-time is mandatory to choose !")
+    private String transactionDateTime;
     @NotNull(message = "total expenses is mandatory to provide !")
     private Double totalTransactionAmount;
     private Boolean transactionRefurbishmentStatus;
